@@ -6,7 +6,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { clockClasses } from "@mui/x-date-pickers";
 
-export default function CalendarCard({ date, setDate }) {
+export default function Calendar({ date, setDate }) {
   const handleDateChange = () => {};
   return (
     <div>
