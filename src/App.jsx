@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import Header from "./components/Header";
 import Calendar from "./components/Calendar";
@@ -8,13 +8,9 @@ import SearchStock from "./components/SearchStock";
 import StockGrid from "./components/StockGrid";
 
 function App() {
-  const [date, setDate] = useState(dayjs(new Date()));
-  // const nseIndia = new NseIndia();
 
-  // To get equity details for specific symbol
-  // nseIndia.getAllStockSymbols().then((symbols) => {
-  //   console.log(symbols);
-  // });
+  const [date, setDate] = useState(dayjs(new Date()));
+ 
 
   return (
     <div className="App">
@@ -22,7 +18,7 @@ function App() {
       <div className="flex justify-start flex-col md:space-x-40 mt-20 md:flex-row w-full ">
         <Calendar date={date} setDate={setDate} />
         {/* <SearchStock date={date} setDate={setDate} /> */}
-        <StockGrid />
+        <StockGrid date={date} setDate={setDate}/>
       </div>
     </div>
   );
