@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Response from "../../Response";
+import { green } from "@mui/material/colors";
 
 const StockGrid = ({ date, setDate }) => {
   // useEffect(()=>{
@@ -26,17 +27,25 @@ const StockGrid = ({ date, setDate }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStock, setSelectedStock] = useState("");
   const [stockPrice, setStockPrice] = useState("");
+  const [buyPrice, setBuyPrice] = useState("");
+  const [sellPrice, setSellPrice] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [mtm, setMtm] = useState("");
   const [searchList, setSearchList] = useState([]);
   const [stockData, setStockData] = useState([
     {
       stockName: "",
       currentPrice: "",
+      buyPrice: "",
+      sellPrice: "",
+      quantity: "",
+      mtm: "",
     },
   ]);
-  console.log(searchTerm);
   const createNewRow = () => {
     setStockData([...stockData, stockData]);
   };
+  const mtmColor = mtm > 0 ? "bg-green-300" : mtm < 0 ? "bg-red-300" : "";
   const fetchStockPrice = async () => {
     const response = await fetch(
       `http://localhost:3000/details/${selectedStock}`
@@ -48,14 +57,10 @@ const StockGrid = ({ date, setDate }) => {
   useEffect(() => {
     if (selectedStock) fetchStockPrice();
   }, [selectedStock]);
-  //   useEffect(() => {
-  //     async function fetchData() {
-  //       const response = await fetch('http://localhost:3000/allsymbols');
-  //       const jsonData = await response.json();
-  //       console.log(jsonData);
-  //     }
-  //     fetchData();
-  //   }, []);
+  useEffect(() => {
+    setMtm(sellPrice * quantity - buyPrice * quantity);
+  }, [buyPrice, sellPrice, quantity]);
+
   const searchStock = (value) => {
     const ans = Response.filter((stock) => {
       return (
@@ -65,17 +70,19 @@ const StockGrid = ({ date, setDate }) => {
     setSearchList(ans);
   };
   const handleChange = (value) => {
+    if (!searchTerm) setStockPrice("");
     setSearchTerm(value);
     searchStock(value);
   };
   const setDropdownValue = (event) => {
+    setSearchTerm(event.target.outerText);
     setSelectedStock(event.target.outerText);
     setSearchList([]);
   };
   return (
     <div className="relative overflow-x-auto">
       <h3 className="text-lg font-semibold border-2">
-        {` ${date.$D} - ${date.$M + 1} - ${date.$y} ${selectedStock}`}
+        {` ${date.$D} - ${date.$M + 1} - ${date.$y} ${searchTerm}`}
       </h3>
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -91,6 +98,12 @@ const StockGrid = ({ date, setDate }) => {
             </th>
             <th scope="col" className="px-6 py-3">
               Sell Price
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Quantity
+            </th>
+            <th scope="col" className="px-6 py-3">
+              MTM
             </th>
             <th scope="col" className="px-6 py-3">
               <svg
@@ -142,8 +155,10 @@ const StockGrid = ({ date, setDate }) => {
                   </div>
                 </td>
                 {/* <div className="flex justify-center items-center h-20"> */}
-                <td className="bg-slate-50 mt-2 text-center h-8 w-24">
-                  ₹ {stockPrice || " 0"}
+                <td>
+                  <h2 className=" text-center p-1 mt-3 px-4 bg-slate-50">
+                    ₹ {stockPrice || " 0"}
+                  </h2>
                 </td>
                 {/* </div> */}
                 <td className="px-6 py-4">
@@ -152,6 +167,8 @@ const StockGrid = ({ date, setDate }) => {
                     id="buyprice"
                     type="number"
                     placeholder="Buy price"
+                    value={buyPrice}
+                    onChange={(e) => setBuyPrice(e.target.value)}
                   />
                 </td>
                 <td className="px-6 py-4">
@@ -160,18 +177,39 @@ const StockGrid = ({ date, setDate }) => {
                     id="sellprice"
                     type="number"
                     placeholder="Sell price"
+                    value={sellPrice}
+                    onChange={(e) => setSellPrice(e.target.value)}
+                  />
+                </td>
+                <td className="px-6 py-4">
+                  <input
+                    className="shadow appearance-none border rounded w-full py-2 px-3 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="qty"
+                    type="number"
+                    placeholder="Quantity"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
                   />
                 </td>
                 <td>
+                  {/* className={`text-lg font-bold ${className}`} */}
+                  <h2 className={`text-center p-1 mt-3 px-4 ${mtmColor}`}>
+                    {mtm}
+                  </h2>
+                </td>
+                {/* <td>
                   <button className="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-3 focus:outline-none hover:bg-indigo-600 rounded text-sm">
                     Save
                   </button>
-                </td>
+                </td> */}
               </tr>
             );
           })}
         </tbody>
       </table>
+      {/* <button className="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-3 focus:outline-none hover:bg-indigo-600 rounded text-sm">
+                    Save
+                  </button> */}
     </div>
   );
 };

@@ -1,11 +1,11 @@
 import React from "react";
 
-function Header() {
+function Header({darkTheme,setDarkTheme}) {
   return (
     <>
-      <header className="text-gray-600 body-font">
-        <div className="container mx-auto flex flex-wrap  flex-col md:flex-row items-center">
-          <a className="flex title-font font-medium items-center text-gray-900  md:mb-0">
+      <header className="text-gray-600  bg-slate-100 dark:bg-gray-800 dark:text-white body-font">
+        <div className="container mx-auto flex flex-wrap  flex-col md:flex-row items-center justify-between">
+          <a className="flex title-font font-medium items-center md:mb-0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -23,6 +23,9 @@ function Header() {
 
             <span className="ml-3 text-xl">PnL Tracker</span>
           </a>
+          <button type='button' onClick={() => setDarkTheme(!darkTheme)} className ='text-xl dark:bg-gray-50 dark:text-gray-900 bg-white border rounded-full px-2 py-1 m-3 hover:shadow-lg'>
+            {darkTheme ? 'Light 💡':'Dark 🌙'}
+          </button>
         </div>
       </header>
     </>
