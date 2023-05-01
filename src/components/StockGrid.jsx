@@ -1,65 +1,52 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Response from "../../Response";
+import Response from "../data/Response";
+import Trades from "../data/Trades";
 import { green } from "@mui/material/colors";
 
 const StockGrid = ({ date, setDate }) => {
-  // useEffect(()=>{
-  //   const options = {
-  //       method: "GET",
-  //       url: "https://apidojo-yahoo-finance-v1.p.rapidapi.com/auto-complete",
-  //       params: {
-  //         q: "Tata M",
-  //         region: "IN",
-  //       },
-  //       headers: {
-  //         "content-type": "application/octet-stream",
-  //         "X-RapidAPI-Key": "eec9e44be8msh08d7e1139de3beap158069jsn78a102ec5b20",
-  //         "X-RapidAPI-Host": "apidojo-yahoo-finance-v1.p.rapidapi.com",
-  //       },
-  //     };
-  //     const getData = async () => {
-  //       const response = await axios.request(options);
-  //     };
-  //     console.log(response.data);
-  // },[])
-
-  const [searchTerm, setSearchTerm] = useState("");
+  const [newItem, setNewItem] = useState({
+    searchTerm: "",
+    stockPrice: "",
+    buyPrice: "",
+    sellPrice: "",
+    quantity: "",
+    mtm: "",
+  });
+  const [stockData, setStockData] = useState([]);
   const [selectedStock, setSelectedStock] = useState("");
-  const [stockPrice, setStockPrice] = useState("");
-  const [buyPrice, setBuyPrice] = useState("");
-  const [sellPrice, setSellPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [mtm, setMtm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchList, setSearchList] = useState([]);
-  const [stockData, setStockData] = useState([
-    {
-      stockName: "",
-      currentPrice: "",
-      buyPrice: "",
-      sellPrice: "",
-      quantity: "",
-      mtm: "",
-    },
-  ]);
-  const createNewRow = () => {
-    setStockData([...stockData, stockData]);
-  };
-  const mtmColor = mtm > 0 ? "bg-green-300" : mtm < 0 ? "bg-red-300" : "";
+  useEffect(() => {
+    setNewItem((prevItem) => ({
+      ...prevItem,
+      mtm:
+        newItem.sellPrice * newItem.quantity -
+        newItem.buyPrice * newItem.quantity,
+    }));
+    // setMtm(newItem.sellPrice * newItem.quantity - newItem.buyPrice * newItem.quantity);
+  }, [newItem.buyPrice, newItem.sellPrice, newItem.quantity]);
+  const mtmColor =
+    newItem.mtm > 0 ? "bg-green-300" : newItem.mtm < 0 ? "bg-red-300" : "";
+  const stockMtmColor =
+    stockData.mtm > 0 ? "bg-green-300" : stockData.mtm < 0 ? "bg-red-300" : "";
   const fetchStockPrice = async () => {
     const response = await fetch(
       `http://localhost:3000/details/${selectedStock}`
     )
       .then((response) => response.json())
-      .then((data) => setStockPrice(data.priceInfo.lastPrice))
+      .then((data) => {
+        setNewItem((prevItem) => ({
+          ...prevItem,
+          stockPrice: data.priceInfo.lastPrice,
+        }));
+      })
       .catch((error) => console.error(error));
   };
+
   useEffect(() => {
     if (selectedStock) fetchStockPrice();
   }, [selectedStock]);
-  useEffect(() => {
-    setMtm(sellPrice * quantity - buyPrice * quantity);
-  }, [buyPrice, sellPrice, quantity]);
 
   const searchStock = (value) => {
     const ans = Response.filter((stock) => {
@@ -69,20 +56,52 @@ const StockGrid = ({ date, setDate }) => {
     });
     setSearchList(ans);
   };
-  const handleChange = (value) => {
-    if (!searchTerm) setStockPrice("");
-    setSearchTerm(value);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewItem((prevItem) => ({ ...prevItem, [name]: value }));
+  };
+  const handleStockNameChange = (e) => {
+    const { name, value } = e.target;
+    setNewItem((prevItem) => ({ ...prevItem, [name]: value }));
     searchStock(value);
   };
+
+  const handleSubmit = (e) => {
+    console.log(newItem);
+    if (Object.values(newItem).includes("")) {
+      console.log("At least one value in myObject is null");
+    } else {
+      console.log("No value in myObject is null");
+      const newId = stockData.length + 1;
+      newItem.searchTerm = selectedStock;
+      const newData = [...stockData, { id: newId, ...newItem }];
+      setStockData(newData);
+      setSelectedStock("");
+      setNewItem({
+        searchTerm: "",
+        stockPrice: "",
+        buyPrice: "",
+        sellPrice: "",
+        quantity: "",
+        mtm: "",
+      });
+    }
+  };
+
   const setDropdownValue = (event) => {
-    setSearchTerm(event.target.outerText);
+    const { name, value } = event.target;
+    // setNewItem((prevItem) => ({ ...prevItem, searchTerm: value}));
     setSelectedStock(event.target.outerText);
+    setNewItem((prevItem) => ({
+      ...prevItem,
+      searchTerm: event.target.outerText,
+    }));
     setSearchList([]);
   };
   return (
     <div className="relative overflow-x-auto">
       <h3 className="text-lg font-semibold border-2">
-        {` ${date.$D} - ${date.$M + 1} - ${date.$y} ${searchTerm}`}
+        {` ${date.$D} - ${date.$M + 1} - ${date.$y}`}
       </h3>
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -113,7 +132,7 @@ const StockGrid = ({ date, setDate }) => {
                 strokeWidth={1.5}
                 stroke="currentColor"
                 className="w-6 h-6 cursor-pointer"
-                onClick={createNewRow}
+                onClick={handleSubmit}
               >
                 <path
                   strokeLinecap="round"
@@ -126,85 +145,108 @@ const StockGrid = ({ date, setDate }) => {
         </thead>
 
         <tbody>
-          {stockData.map((data) => {
-            return (
-              <tr
-                key={data.currentPrice}
-                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 "
+          {stockData.map((item, id) => (
+            <tr
+              className="text-md text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400 px-2"
+              key={id}
+            >
+              <td className="px-6 py-3 border border-gray-200">
+                {item.searchTerm}
+              </td>
+              <td className="px-6 py-3 border border-gray-200">
+                {item.stockPrice}
+              </td>
+              <td className="px-6 py-3 border border-gray-200">
+                {item.buyPrice}
+              </td>
+              <td className="px-6 py-3 border border-gray-200">
+                {item.sellPrice}
+              </td>
+              <td className="px-6 py-3 border border-gray-200">
+                {item.quantity}
+              </td>
+              <td
+                className={`text-center p-1 mt-3 px-4 ${item.mtm > 0 ? "bg-green-300" : item.mtm < 0 ? "bg-red-300" : ""}`}
               >
-                <td className="px-6 py-4">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-1 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="stockname"
-                    type="text"
-                    placeholder="Stock name"
-                    value={searchTerm}
-                    onChange={(e) => handleChange(e.target.value)}
-                  />
-                  <div className="max-h-28 overflow-auto">
-                    {searchList.map((ele, id) => {
-                      return (
-                        <div
-                          key={id}
-                          className="cursor-pointer hover:bg-slate-200"
-                        >
-                          <div onClick={(e) => setDropdownValue(e)}>{ele}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </td>
-                {/* <div className="flex justify-center items-center h-20"> */}
-                <td>
-                  <h2 className=" text-center p-1 mt-3 px-4 bg-slate-50">
-                    ₹ {stockPrice || " 0"}
-                  </h2>
-                </td>
-                {/* </div> */}
-                <td className="px-6 py-4">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="buyprice"
-                    type="number"
-                    placeholder="Buy price"
-                    value={buyPrice}
-                    onChange={(e) => setBuyPrice(e.target.value)}
-                  />
-                </td>
-                <td className="px-6 py-4">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="sellprice"
-                    type="number"
-                    placeholder="Sell price"
-                    value={sellPrice}
-                    onChange={(e) => setSellPrice(e.target.value)}
-                  />
-                </td>
-                <td className="px-6 py-4">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="qty"
-                    type="number"
-                    placeholder="Quantity"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                  />
-                </td>
-                <td>
-                  {/* className={`text-lg font-bold ${className}`} */}
-                  <h2 className={`text-center p-1 mt-3 px-4 ${mtmColor}`}>
-                    {mtm}
-                  </h2>
-                </td>
-                {/* <td>
+                {item.mtm}
+              </td>
+            </tr>
+          ))}
+          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 ">
+            <td className="px-6 py-4">
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-1 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                name="searchTerm"
+                type="text"
+                onFocus={() =>
+                  newItem.searchTerm ? searchStock : setSearchList(Response)
+                }
+                autoComplete="off"
+                placeholder="Stock name"
+                value={newItem.searchTerm}
+                onChange={handleStockNameChange}
+              />
+              <div className="max-h-28 overflow-auto">
+                {searchList.map((ele, id) => {
+                  return (
+                    <div key={id} className="cursor-pointer hover:bg-slate-200">
+                      <div onClick={(e) => setDropdownValue(e)}>{ele}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </td>
+            {/* <div className="flex justify-center items-center h-20"> */}
+            <td>
+              <h2
+                name="stockPrice"
+                className=" text-center p-1 mt-3 px-4 bg-slate-50"
+              >
+                ₹ {newItem.stockPrice || " 0"}
+              </h2>
+            </td>
+            {/* </div> */}
+            <td className="px-6 py-4">
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                name="buyPrice"
+                type="number"
+                placeholder="Buy price"
+                value={newItem.buyPrice || newItem.stockPrice}
+                onChange={handleChange}
+              />
+            </td>
+            <td className="px-6 py-4">
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                name="sellPrice"
+                type="number"
+                placeholder="Sell price"
+                value={newItem.sellPrice || newItem.stockPrice}
+                onChange={handleChange}
+              />
+            </td>
+            <td className="px-6 py-4">
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 mt-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                name="quantity"
+                type="number"
+                placeholder="Quantity"
+                value={newItem.quantity}
+                onChange={handleChange}
+              />
+            </td>
+            <td className={`text-lg font-bold`}>
+              <h2 className={`text-center p-1 mt-3 px-4 ${mtmColor}`}>
+                {newItem.mtm}
+              </h2>
+            </td>
+            {/* <td>
                   <button className="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-3 focus:outline-none hover:bg-indigo-600 rounded text-sm">
                     Save
                   </button>
                 </td> */}
-              </tr>
-            );
-          })}
+          </tr>
         </tbody>
       </table>
       {/* <button className="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-3 focus:outline-none hover:bg-indigo-600 rounded text-sm">
