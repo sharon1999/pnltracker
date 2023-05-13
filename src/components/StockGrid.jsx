@@ -5,6 +5,8 @@ import Trades from "../data/Trades";
 import { green } from "@mui/material/colors";
 
 const StockGrid = ({ date, setDate }) => {
+  const dispalyDate = `${date.$D} - ${date.$M + 1} - ${date.$y}`;
+
   const [newItem, setNewItem] = useState({
     searchTerm: "",
     stockPrice: "",
@@ -33,15 +35,33 @@ const StockGrid = ({ date, setDate }) => {
   const fetchStockPrice = async () => {
     const response = await fetch(
       `http://localhost:3000/details/${selectedStock}`
+      // `https://nsedatascrapper.onrender.com/details/${selectedStock}`
     )
       .then((response) => response.json())
       .then((data) => {
         setNewItem((prevItem) => ({
           ...prevItem,
           stockPrice: data.priceInfo.lastPrice,
+          buyPrice: data.priceInfo.lastPrice,
+          sellPrice: data.priceInfo.lastPrice,
         }));
       })
       .catch((error) => console.error(error));
+  };
+  useEffect(() => {
+    setStockData([]);
+    setNewItem({
+      searchTerm: "",
+      stockPrice: "",
+      buyPrice: "",
+      sellPrice: "",
+      quantity: "",
+      mtm: "",
+    });
+  }, [date]);
+  let saveTrade = () => {
+    console.log(stockData);
+    localStorage.setItem(dispalyDate, JSON.stringify(stockData));
   };
 
   useEffect(() => {
@@ -101,7 +121,8 @@ const StockGrid = ({ date, setDate }) => {
   return (
     <div className="relative overflow-x-auto">
       <h3 className="text-lg font-semibold border-2">
-        {` ${date.$D} - ${date.$M + 1} - ${date.$y}`}
+        {/* {` ${date.$D} - ${date.$M + 1} - ${date.$y}`} */}
+        {dispalyDate}
       </h3>
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -166,7 +187,13 @@ const StockGrid = ({ date, setDate }) => {
                 {item.quantity}
               </td>
               <td
-                className={`text-center p-1 mt-3 px-4 ${item.mtm > 0 ? "bg-green-300" : item.mtm < 0 ? "bg-red-300" : ""}`}
+                className={`text-center p-1 mt-3 px-4 ${
+                  item.mtm > 0
+                    ? "bg-green-300"
+                    : item.mtm < 0
+                    ? "bg-red-300"
+                    : ""
+                }`}
               >
                 {item.mtm}
               </td>
@@ -241,17 +268,15 @@ const StockGrid = ({ date, setDate }) => {
                 {newItem.mtm}
               </h2>
             </td>
-            {/* <td>
-                  <button className="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-3 focus:outline-none hover:bg-indigo-600 rounded text-sm">
-                    Save
-                  </button>
-                </td> */}
           </tr>
         </tbody>
       </table>
-      {/* <button className="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-3 focus:outline-none hover:bg-indigo-600 rounded text-sm">
-                    Save
-                  </button> */}
+      <button
+        onClick={saveTrade}
+        className="flex justify-end mx-auto my-3 text-white bg-indigo-500 border-0 py-2 px-3 focus:outline-none hover:bg-indigo-600 rounded text-sm"
+      >
+        Save
+      </button>
     </div>
   );
 };
