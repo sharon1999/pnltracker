@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import Response from "../data/Response";
 import Trades from "../data/Trades";
 import { green } from "@mui/material/colors";
@@ -8,6 +9,7 @@ const StockGrid = ({ date, setDate }) => {
   const dispalyDate = `${date.$D} - ${date.$M + 1} - ${date.$y}`;
 
   const [newItem, setNewItem] = useState({
+    id: "",
     searchTerm: "",
     stockPrice: "",
     buyPrice: "",
@@ -19,6 +21,7 @@ const StockGrid = ({ date, setDate }) => {
   const [selectedStock, setSelectedStock] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchList, setSearchList] = useState([]);
+  const [update, setUpdate] = useState(false);
   useEffect(() => {
     setNewItem((prevItem) => ({
       ...prevItem,
@@ -41,6 +44,7 @@ const StockGrid = ({ date, setDate }) => {
       .then((data) => {
         setNewItem((prevItem) => ({
           ...prevItem,
+          id: uuidv4(),
           stockPrice: data.priceInfo.lastPrice,
           buyPrice: data.priceInfo.lastPrice,
           sellPrice: data.priceInfo.lastPrice,
@@ -86,13 +90,20 @@ const StockGrid = ({ date, setDate }) => {
     searchStock(value);
   };
 
+  const handleEdit = (editItem) => {
+    // const editRecord = stockData.filter((stock) => {
+    //   return stock.id === id;
+    // });
+    setUpdate(true);
+    setNewItem({ ...editItem });
+  };
   const handleSubmit = (e) => {
-    console.log(newItem);
+    // console.log(newItem);
     if (Object.values(newItem).includes("")) {
       console.log("At least one value in myObject is null");
     } else {
       console.log("No value in myObject is null");
-      const newId = stockData.length + 1;
+      const newId = uuidv4();
       newItem.searchTerm = selectedStock;
       const newData = [...stockData, { id: newId, ...newItem }];
       setStockData(newData);
@@ -106,6 +117,20 @@ const StockGrid = ({ date, setDate }) => {
         mtm: "",
       });
     }
+  };
+  
+  const handleUpdate = (updateItem) => {
+    console.log(stockData);
+    console.log(updateItem);
+    setStockData(stockData.map((stock) => {
+      if (stock.id === updateItem.id) {
+        return { ...stock,...updateItem };
+      } else {
+        return stock;
+      }
+    }))
+    // const newData = [...stockData, { id: newId, ...newItem }];
+    // setStockData(newData);
   };
 
   const setDropdownValue = (event) => {
@@ -122,7 +147,7 @@ const StockGrid = ({ date, setDate }) => {
     <div className="relative overflow-x-auto">
       <h3 className="text-lg font-semibold border-2">
         {/* {` ${date.$D} - ${date.$M + 1} - ${date.$y}`} */}
-        {dispalyDate}
+        {dispalyDate} {selectedStock}
       </h3>
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -144,23 +169,6 @@ const StockGrid = ({ date, setDate }) => {
             </th>
             <th scope="col" className="px-6 py-3">
               MTM
-            </th>
-            <th scope="col" className="px-6 py-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6 cursor-pointer"
-                onClick={handleSubmit}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
             </th>
           </tr>
         </thead>
@@ -196,6 +204,23 @@ const StockGrid = ({ date, setDate }) => {
                 }`}
               >
                 {item.mtm}
+              </td>
+              <td>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6 m-3 cursor-pointer"
+                  onClick={() => handleEdit(item)}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+                  />
+                </svg>
               </td>
             </tr>
           ))}
@@ -267,6 +292,43 @@ const StockGrid = ({ date, setDate }) => {
               <h2 className={`text-center p-1 mt-3 px-4 ${mtmColor}`}>
                 {newItem.mtm}
               </h2>
+            </td>
+            <td scope="col" className="px-6 py-3">
+              {selectedStock !== "" ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6 cursor-pointer"
+                  onClick={handleSubmit}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              ) : update ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6 cursor-pointer"
+                  onClick={() => handleUpdate(newItem)}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              ) : (
+                ""
+              )}
             </td>
           </tr>
         </tbody>
