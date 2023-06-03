@@ -1,5 +1,8 @@
 import { initializeApp } from "firebase/app";
+
 import {getAuth} from "firebase/auth"
+import { getFirestore } from "firebase/firestore";
+
 const firebaseConfig = {
   apiKey: "AIzaSyC86v3H7nqqBep58Eq1kY5oW3IFn03cajk",
   authDomain: "pnltracker-e0dac.firebaseapp.com",
@@ -12,4 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+
 export default app;
+

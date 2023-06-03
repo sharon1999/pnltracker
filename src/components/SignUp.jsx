@@ -12,7 +12,7 @@ function SignUp() {
     e.preventDefault();
     setError("");
     try {
-      await signUp(email, password);
+      // await signUp(email, password);
       navigate("/");
     } catch (error) {
       setError(error.message);
@@ -20,7 +20,7 @@ function SignUp() {
     }
   };
   return (
-    <div className="flex justify-center text-gray-600 bg-slate-50 dark:bg-gray-700 dark:text-white h-[90vh]">
+    <div className="flex justify-center bg-color h-[90vh]">
       <form className=" p-10  w-full mx-auto " onSubmit={handleSubmit}>
         {error && (
           <div

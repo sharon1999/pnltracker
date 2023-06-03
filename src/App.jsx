@@ -7,10 +7,12 @@ import StockGrid from "./components/StockGrid";
 import Home from "./components/Home";
 import SignUp from "./components/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { useUserAuth } from "./context/UserAuthContext";
+
 
 function App() {
   const [date, setDate] = useState(dayjs(new Date()));
-  const [darkTheme, setDarkTheme] = useState(false);
+  const { darkTheme,setDarkTheme } = useUserAuth()
 
   return (
     <div className={darkTheme ? "dark" : ""} >

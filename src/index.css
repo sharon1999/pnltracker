@@ -2,3 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .btn-primary {
+    @apply flex text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg
+  }
+  .bg-color{
+    @apply text-gray-600 bg-slate-50 dark:bg-gray-700 dark:text-white
+  }
+}
