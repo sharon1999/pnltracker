@@ -81,19 +81,41 @@ const StockGrid = ({ date, setDate }) => {
     }
   }, [date]);
   let saveTrade = async () => {
-    console.log(stockData);
-    console.log(db);
+    console.log(newItem);
 
-    const docData = {
-      trade: stockData,
-    };
-    await setDoc(doc(db, "Sharon", dispalyDate), docData);
+    await setDoc(doc(db, user.email, dispalyDate), {
+      trade: [
+        {
+          buyPrice: newItem.buyPrice,
+          mtm: newItem.mtm,
+          quantity: newItem.quantity,
+          searchTerm: newItem.searchTerm,
+          sellPrice: newItem.sellPrice,
+          stockPrice: newItem.stockPrice,
+        },
+      ],
+    });
   };
 
   useEffect(() => {
     if (selectedStock) fetchStockPrice();
   }, [selectedStock]);
+  const getData = async () => {
+    const docRef = doc(db, user.email, dispalyDate);
+    const docSnap = await getDoc(docRef);
 
+    if (docSnap.exists()) {
+      const trade = docSnap.data().trade;
+      console.log("Document data:", trade);
+      setStockData(trade)
+    } else {
+      // docSnap.data() will be undefined in this case
+      console.log("No such document!");
+    }
+  };
+  useEffect(() => {
+    getData();
+  }, [dispalyDate]);
   const searchStock = (value) => {
     const ans = Response.filter((stock) => {
       return (

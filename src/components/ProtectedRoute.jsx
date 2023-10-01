@@ -9,7 +9,6 @@ function ProtectedRoute({ children }) {
   }
   return children;
 
-  return <div>ProtectedRoute</div>;
 }
 
 export default ProtectedRoute;
