@@ -23,7 +23,7 @@ function Login() {
   return (
     <div className="g-6  flex  w-full bg-color">
       {/* Right column container */}
-      <div className="mb-12 mx-auto md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12">
+      <div className="mb-12 mx-auto">
         <h1 className="text-3xl bg-indigo-400 text-white text-center p-3 font-semibold ">Login</h1>
         <form onSubmit={handleSubmit} className=" w-full p-10  bg-slate-200 dark:bg-gray-600">
           {/*Sign in section*/}
@@ -32,7 +32,7 @@ function Login() {
               className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-3"
               role="alert"
             >
-              <span className="block sm:inline">{error}</span>
+              <span className="block">{error}</span>
               <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
                 <svg
                   className="fill-current h-6 w-6 text-red-500"

@@ -18,7 +18,7 @@ export default function Calendar({ date, setDate }) {
   });
   return (
     <ThemeProvider theme={materialTheme}>
-      <div className="p-20">
+      <div className="p-10">
         <div className="text-end">
           <button
             className="btn-primary"
