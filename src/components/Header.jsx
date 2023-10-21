@@ -3,8 +3,11 @@ import { useUserAuth } from "../context/UserAuthContext";
 import { Link, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useDispatch } from "react-redux";
+import { setTheme } from "../redux/themeSlice";
 
-function Header({ darkTheme, setDarkTheme }) {
+function Header({ darkTheme }) {
+  const dispatch = useDispatch();
   const [showLogout, setShowLogout] = useState(false);
   const location = useLocation();
   const { logOut, notify, user } = useUserAuth();
@@ -37,7 +40,7 @@ function Header({ darkTheme, setDarkTheme }) {
       >
         <button
           type="button"
-          onClick={() => setDarkTheme(!darkTheme)}
+          onClick={() => dispatch(setTheme(!darkTheme))}
           className="text-xl  mr-5 dark:bg-gray-50 dark:text-gray-900 bg-white border rounded-full px-2 py-1 hover:shadow-lg"
         >
           {darkTheme ? "Light 💡" : "Dark 🌙"}

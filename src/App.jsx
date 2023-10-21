@@ -7,16 +7,15 @@ import StockGrid from "./components/StockGrid";
 import Home from "./components/Home";
 import SignUp from "./components/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useUserAuth } from "./context/UserAuthContext";
-
+import { useSelector } from "react-redux";
+import TradeDetails from "./components/TradeDetails";
 
 function App() {
   const [date, setDate] = useState(dayjs(new Date()));
-  const { darkTheme,setDarkTheme } = useUserAuth()
-
+  const darkTheme = useSelector(store=>store.theme.darkTheme)
   return (
-    <div className={darkTheme ? "dark" : ""} >
-      <Header darkTheme={darkTheme} setDarkTheme={setDarkTheme} />
+    <div className={darkTheme ? "dark" : ""}>
+      <Header darkTheme={darkTheme}/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
@@ -27,6 +26,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/tradedetails" element={<TradeDetails />} />
         <Route path="/signup" element={<SignUp />} />
       </Routes>
       {/* 
